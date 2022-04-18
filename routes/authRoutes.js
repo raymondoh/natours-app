@@ -3,7 +3,14 @@ const express = require("express");
 const router = express.Router();
 
 // import controllers
-const { signup, login, forgotPassword, resetPassword } = require("../controllers/authController");
+const {
+  signup,
+  login,
+  forgotPassword,
+  resetPassword,
+  updatePassword,
+  protectedRoute
+} = require("../controllers/authController");
 
 // import middleware
 
@@ -11,7 +18,8 @@ const { signup, login, forgotPassword, resetPassword } = require("../controllers
 router.route("/signup").post(signup);
 router.route("/login").post(login);
 router.route("/forgot-password").post(forgotPassword);
-router.route("/reset-password/:token").post(resetPassword);
+router.route("/reset-password/:token").patch(resetPassword);
+router.route("/update-password").patch(protectedRoute, updatePassword);
 
 // export router
 module.exports = router;
