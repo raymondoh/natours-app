@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 const validator = require("validator");
+const User = require("./UserModel");
 
 const TourSchema = new mongoose.Schema(
   {
@@ -78,10 +79,38 @@ const TourSchema = new mongoose.Schema(
         message: "discount can't be more than the price (${VALUE})"
       }
     },
-    startDates: [Date]
+    startDates: [Date],
+    startLocation: {
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"]
+      },
+      coordinates: [Number],
+      address: String,
+      description: String
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"]
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User"
+      }
+    ]
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true }, id: false }
-  //   { toJSON: { virtuals: true }, toObject: { virtuals: true }, id: false }
 );
 
 // DURATION MIDDLEWARE
@@ -97,6 +126,13 @@ TourSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+// embedding
+// TourSchema.pre("save", async function (next) {
+//   const guidesPromises = this.guides.map(async id => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 /*
 // pre save hook
 TourSchema.pre("save", function () {
