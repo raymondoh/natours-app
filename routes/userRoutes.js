@@ -10,15 +10,24 @@ const {
   updateUser,
   deleteUser,
   updateMe,
-  deleteMe
+  deleteMe,
+  getMe
 } = require("../controllers/userController");
-const { protectedRoute } = require("../controllers/authController");
+const { protectedRoute, restrictTo } = require("../controllers/authController");
 
 // import middleware
 
+// protect all routes below
+router.use(protectedRoute);
+
 // set up routes
-router.route("/update-me").patch(protectedRoute, updateMe);
-router.route("/delete-me").delete(protectedRoute, deleteMe);
+router.route("/me").get(getMe, getUser);
+router.route("/update-me").patch(updateMe);
+router.route("/delete-me").delete(deleteMe);
+
+// protect all routes below to admin
+router.use(restrictTo);
+
 router.route("/").get(getAllUsers).post(createUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
 

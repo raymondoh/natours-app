@@ -19,6 +19,7 @@ router.route("/signup").post(signup);
 router.route("/login").post(login);
 router.route("/forgot-password").post(forgotPassword);
 router.route("/reset-password/:token").patch(resetPassword);
+//protected route
 router.route("/update-password").patch(protectedRoute, updatePassword);
 
 // export router

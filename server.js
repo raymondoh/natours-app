@@ -7,12 +7,14 @@ const morgan = require("morgan");
 const mongoSanitize = require("express");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const colors = require("colors");
 const AppError = require("./middleware/appError");
 const globalErrorHandler = require("./controllers/errorController");
 // 1 ROUTE HANDLERS import routers + middleware
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 const authRouter = require("./routes/authRoutes");
+const reviewRouter = require("./routes/reviewRoutes");
 
 const app = express();
 //console.log(process.env.NODE_ENV);
@@ -53,6 +55,7 @@ app.use(express.static(`${__dirname}/public`));
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/reviews", reviewRouter);
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
@@ -65,7 +68,7 @@ const port = process.env.PORT || 3001;
 // start app - spin up server if successful, will only start if connection to mongo db successful
 const start = async () => {
   try {
-    await connectDB(process.env.DATABASE_CONNECTION);
+    await connectDB(process.env.MONGO_URI);
     app.listen(port, () => {
       console.log(`server is listening on port ${port}`);
     });

@@ -1,12 +1,19 @@
 const Tour = require("../models/TourModel");
-const APIFeatures = require("../utils/apiFeatures");
+//const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const factory = require("./handlerFactory");
+
+const getAllTours = factory.getAll(Tour);
+const createTour = factory.createOne(Tour);
+const getTour = factory.getOne(Tour, { path: "reviews" });
+const updateTour = factory.updateOne(Tour);
+const deleteTour = factory.deleteOne(Tour);
 
 // @desc    Get All Tours
 // @route   GET /api/v1/tours
 // @access  Public
-const getAllTours = catchAsync(async (req, res, next) => {
+const getAllTours1 = catchAsync(async (req, res, next) => {
   //console.log(req.body);
   //console.log(req.query);
   // EXECUTE QUERY
@@ -25,7 +32,7 @@ const getAllTours = catchAsync(async (req, res, next) => {
 // @desc    Create Tour
 // @route   POST /api/v1/tours
 // @access  Private
-const createTour = catchAsync(async (req, res, next) => {
+const createTour1 = catchAsync(async (req, res, next) => {
   // 1 - use the data coming in from the body
   const tour = await Tour.create(req.body);
   res.status(201).json({
@@ -51,8 +58,9 @@ const createTour = catchAsync(async (req, res, next) => {
 // @route   GET /api/v1/tours/:id
 // @access  Public
 // findById(req.params.id) shorthand for === findOne({_id: req.params.id})
-const getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
+const getTour1 = catchAsync(async (req, res, next) => {
+  const tour = await Tour.findById(req.params.id).populate("reviews");
+
   if (!tour) {
     return next(new AppError("No tour found with that ID", 404));
   }
@@ -67,7 +75,8 @@ const getTour = catchAsync(async (req, res, next) => {
 // @desc    Update Tour
 // @route   PATCH /api/v1/tours/:id
 // @access  PRIVATE
-const updateTour = catchAsync(async (req, res, next) => {
+
+const updateTour1 = catchAsync(async (req, res, next) => {
   //3 paramaters = 1, id, 2 - data we want to change 3  options object
   // findOneAndUpdate shorthand for findByIdAndUpdate
   const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
@@ -89,7 +98,8 @@ const updateTour = catchAsync(async (req, res, next) => {
 // @desc    Delete Tour
 // @route   DELETE /api/v1/tours/:id
 // @access  PRIVATE
-const deleteTour = catchAsync(async (req, res, next) => {
+
+const deleteTour1 = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndDelete(req.params.id);
   if (!tour) {
     return next(new AppError("No tour found with that ID", 404));

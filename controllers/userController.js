@@ -1,6 +1,12 @@
 const User = require("../models/UserModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const factory = require("./handlerFactory");
+
+const getAllUsers = factory.getAll(User);
+const getUser = factory.getOne(User);
+const deleteUser = factory.deleteOne(User);
+const updateUser = factory.updateOne(User);
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -13,7 +19,7 @@ const filterObj = (obj, ...allowedFields) => {
 // @desc    Get All users
 // @route   GET /api/v1/users
 // @access  Public
-const getAllUsers = catchAsync(async (req, res) => {
+const getAllUsers1 = catchAsync(async (req, res) => {
   const users = await User.find();
 
   // SEND RESPONSE
@@ -30,28 +36,37 @@ const getAllUsers = catchAsync(async (req, res) => {
 // @route   POST /api/v1/users
 // @access  Private
 const createUser = (req, res) => {
-  res.send("create user");
+  res.status(500).json({
+    status: "fail",
+    message: "This route is not defined. Please use sign up instead"
+  });
 };
 
 // @desc    Get User
 // @route   GET /api/v1/users/:id
 // @access  Public
-const getUser = (req, res) => {
+const getUser1 = (req, res) => {
   res.send("get user");
 };
 
 // @desc    Update User
 // @route   PATCH /api/v1/users/:id
 // @access  PRIVATE
-const updateUser = (req, res) => {
+const updateUser1 = (req, res) => {
   res.send("update user");
 };
 
 // @desc    Delete User
 // @route   DELETE /api/v1/users/:id
 // @access  PRIVATE
-const deleteUser = (req, res) => {
+
+const deleteUser1 = (req, res) => {
   res.send("delete user");
+};
+
+const getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
 };
 // @desc    Update User
 // @route   UPDATE /api/v1/users/:id
@@ -101,5 +116,6 @@ module.exports = {
   updateUser,
   deleteUser,
   updateMe,
-  deleteMe
+  deleteMe,
+  getMe
 };

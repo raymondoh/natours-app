@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 const validator = require("validator");
-const User = require("./UserModel");
 
 const TourSchema = new mongoose.Schema(
   {
@@ -37,7 +36,7 @@ const TourSchema = new mongoose.Schema(
       type: String,
       required: [true, "please enter tour difficulty"],
       enum: {
-        values: ["easy", "medium", "hard"],
+        values: ["easy", "medium", "difficult"],
         message: "Please choose either easy, medium or difficult"
       }
     },
@@ -45,7 +44,8 @@ const TourSchema = new mongoose.Schema(
       type: Number,
       default: 4.5,
       min: [1, "rating must be above 1.0"],
-      max: [5, "rating must be below 5.1"]
+      max: [5, "rating must be below 5.1"],
+      set: val => Math.round(val * 10) / 10 // 4.666666, 46.6666, 47, 4.7
     },
     ratingsQuantity: {
       type: Number,
@@ -113,11 +113,22 @@ const TourSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true }, id: false }
 );
 
+// Indexing
+TourSchema.index({ price: 1, ratingsAverage: -1 });
+TourSchema.index({ slug: 1 });
+
 // DURATION MIDDLEWARE
 TourSchema.virtual("durationWeeks").get(function () {
   if (this.duration) {
     return this.duration / 7;
   }
+});
+
+// Virtual populate with reviews
+TourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id"
 });
 // DOCUMENT MIDDLEWARE, RUND BEFORE SAVE() AND CREATE(). DOESN'T WORK ON INSERTMANY()
 //pre save hook
@@ -154,8 +165,13 @@ TourSchema.pre(/^find/, function (next) {
   this.start = Date.now();
   next();
 });
-TourSchema.post(/^find/, function (docs, next) {
-  //console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+
+// remove populate from controller into Model for all queries
+TourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v -passwordChangedAt"
+  });
   next();
 });
 // AGGREGATION MIDDLEWARE
@@ -165,4 +181,9 @@ TourSchema.pre("aggregate", function (next) {
   console.log(this.pipeline());
   next();
 });
+TourSchema.post(/^find/, function (docs, next) {
+  //console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  next();
+});
+
 module.exports = mongoose.model("Tour", TourSchema);
